@@ -22,7 +22,7 @@ def build_rag_chain(file_paths: list = None):
     (Your original function — unchanged except metadata tagging on chunks)
     """
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/text-embedding-004",
+        model="models/gemini-embedding-001",
         google_api_key=GOOGLE_API_KEY
     )
 
@@ -200,4 +200,5 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
 
     print(f"✅ Done. Answered {len(results)} questions.")
     return results
+
 
