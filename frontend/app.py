@@ -4,7 +4,7 @@ import requests
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
-API_URL = "http://127.0.0.1:8000"  # Change this for deployment
+API_URL = "https://almabase-tx1q.onrender.com"  # Change this for deployment
 
 st.set_page_config(page_title="Questionnaire RAG Tool", layout="wide")
 
@@ -394,3 +394,4 @@ else:
         show_review_page()
     elif st.session_state.page == "export":
         show_export_page()
+
