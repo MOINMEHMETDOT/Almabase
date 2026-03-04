@@ -30,7 +30,7 @@ def build_rag_chain(file_paths: list = None):
         collection_name="reference_docs_v1",
         connection_string=CONNECTION_STRING,
         embedding_function=embeddings,
-        use_jsonb=True
+        use_jsonb=True,
         pre_delete_collection=True 
     )
 
@@ -225,5 +225,6 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
 
     print(f"✅ Done. Answered {len(results)} questions.")
     return results
+
 
 
