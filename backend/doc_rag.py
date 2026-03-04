@@ -63,7 +63,7 @@ def build_rag_chain(file_paths: list = None):
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0)
 
     system_prompt = (
         "You are an expert assistant tasked with completing a structured questionnaire. "
@@ -200,5 +200,6 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
 
     print(f"✅ Done. Answered {len(results)} questions.")
     return results
+
 
 
