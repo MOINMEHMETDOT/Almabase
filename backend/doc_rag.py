@@ -31,6 +31,7 @@ def build_rag_chain(file_paths: list = None):
         connection_string=CONNECTION_STRING,
         embedding_function=embeddings,
         use_jsonb=True
+        pre_delete_collection=True 
     )
 
     if file_paths:
@@ -224,4 +225,5 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
 
     print(f"✅ Done. Answered {len(results)} questions.")
     return results
+
 
