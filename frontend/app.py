@@ -4,7 +4,7 @@ import requests
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
-API_URL = "https://almabase-tx1q.onrender.com" # Change this for deployment
+API_URL = "http://127.0.0.1:8000"  # Change this for deployment
 
 st.set_page_config(page_title="Questionnaire RAG Tool", layout="wide")
 
@@ -234,6 +234,18 @@ def show_review_page():
         st.warning("No answers found. Please generate answers first.")
         return
 
+    # ── Coverage Summary ──────────────────────────────────────────────────────
+    total     = len(st.session_state.answers)
+    answered  = sum(1 for a in st.session_state.answers if a["answer"] != "Not found in references.")
+    not_found = total - answered
+
+    st.subheader("📊 Coverage Summary")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total Questions", total)
+    col2.metric("✅ Answered with Citations", answered)
+    col3.metric("❌ Not Found in References", not_found)
+    st.divider()
+
     # ── Display each Q&A with an edit option ──────────────────────────────────
     for i, item in enumerate(st.session_state.answers):
         with st.expander(f"Q{item['index']}: {item['question']}", expanded=True):
@@ -246,12 +258,12 @@ def show_review_page():
                 height=100
             )
 
-            # Show citations
+            # Show citations + evidence snippets
             if item["citations"]:
-                citation_text = " | ".join(
-                    [f"📄 {c['source_file']} — Page {c['page']}" for c in item["citations"]]
-                )
-                st.caption(f"Source: {citation_text}")
+                for c in item["citations"]:
+                    st.caption(f"📄 {c['source_file']} — Page {c['page']}")
+                    if c.get("snippet"):
+                        st.info(f"📌 Evidence: *\"{c['snippet']}...\"*")
             else:
                 st.caption("Source: Not found in references.")
 
@@ -381,5 +393,4 @@ else:
     elif st.session_state.page == "review":
         show_review_page()
     elif st.session_state.page == "export":
-
         show_export_page()
