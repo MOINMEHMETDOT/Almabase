@@ -6,8 +6,8 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import PGVector
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_classic.chains import create_retrieval_chain
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
@@ -22,7 +22,7 @@ def build_rag_chain(file_paths: list = None):
     (Your original function — unchanged except metadata tagging on chunks)
     """
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
+        model="models/text-embedding-004",
         google_api_key=GOOGLE_API_KEY
     )
 
@@ -63,7 +63,7 @@ def build_rag_chain(file_paths: list = None):
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
     system_prompt = (
         "You are an expert assistant tasked with completing a structured questionnaire. "
@@ -187,7 +187,8 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
                 seen.add(key)
                 citations.append({
                     "source_file": source_file,
-                    "page": page + 1  # PyPDFLoader is 0-indexed, humans expect page 1
+                    "page": page + 1,  # PyPDFLoader is 0-indexed, humans expect page 1
+                    "snippet": doc.page_content[:200].replace("\n", " ").strip()
                 })
 
         results.append({
