@@ -15,4 +15,5 @@ passlib
 bcrypt==4.0.1
 PyJWT
 python-dotenv
+pypdf
 python-multipart
