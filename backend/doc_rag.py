@@ -6,8 +6,8 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import PGVector
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_classic.chains import create_retrieval_chain
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
 load_dotenv()
@@ -118,15 +118,39 @@ def parse_questionnaire(pdf_path: str) -> list[dict]:
     questions = []
 
     # Strategy 1: Look for numbered lines like "1.", "1)", "Q1.", "Q1:"
+    # Also handles multi-line questions by joining continuation lines
     numbered_pattern = re.compile(r'^(?:Q\s*)?(\d+)[.):\-]\s+(.+)', re.IGNORECASE)
+    continuation_pattern = re.compile(r'^(?:Q\s*)?\d+[.):\-]', re.IGNORECASE)  # starts a NEW question
+
     numbered_hits = []
-    for line in lines:
-        match = numbered_pattern.match(line)
+    i = 0
+    while i < len(lines):
+        match = numbered_pattern.match(lines[i])
         if match:
+            q_index = int(match.group(1))
+            q_text  = match.group(2).strip()
+
+            # Look ahead and join continuation lines until the next numbered question or end
+            j = i + 1
+            while j < len(lines):
+                next_line = lines[j]
+                # Stop if next line starts a new numbered question
+                if continuation_pattern.match(next_line):
+                    break
+                # Stop if next line looks like a heading
+                if is_heading(next_line):
+                    break
+                # Otherwise it's a continuation — append it
+                q_text += " " + next_line.strip()
+                j += 1
+
             numbered_hits.append({
-                "index": int(match.group(1)),
-                "question": match.group(2).strip()
+                "index": q_index,
+                "question": q_text.strip()
             })
+            i = j  # jump past the lines we already consumed
+        else:
+            i += 1
 
     if len(numbered_hits) >= 3:
         # Looks like a numbered questionnaire — use this
@@ -200,6 +224,3 @@ def answer_questionnaire(questions: list[dict], rag_chain) -> list[dict]:
 
     print(f"✅ Done. Answered {len(results)} questions.")
     return results
-
-
-
